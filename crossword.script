@@ -1,0 +1,89 @@
+--
+-- Copyright (c) 2025 joshua stein <jcs@jcs.org>
+--
+-- Permission to use, copy, modify, and distribute this software for any
+-- purpose with or without fee is hereby granted, provided that the above
+-- copyright notice and this permission notice appear in all copies.
+--
+-- THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+-- WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+-- MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+-- ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+-- WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+-- ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+-- OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+--
+
+-- AppleScript to open Safari, open a private window, navigate to the
+-- "Stan Newman's Daily Crossword" page, bypass all the junk, then bring
+-- up the printable version of today's crossword as a PDF, and then save
+-- it to the desktop as "crossword.pdf"
+
+tell application "System Events"
+	tell application "Safari" to activate
+	delay 1
+	keystroke "n" using {command down, shift down}
+	delay 1
+	set u to "https://www.arkadium.com/games/stan-newmans-daily-crossword/"
+	keystroke u
+	keystroke return
+	delay 5
+
+	-- bypass cookie screen
+	tell application "Safari"
+		tell document 1
+			do JavaScript "Array.from(document.getElementsByTagName('button')).filter((b) => b.innerHTML == 'CONFIRM').at(0).click();"
+		end tell
+	end tell
+	delay 1
+
+	-- click 'play now'
+	tell application "Safari"
+		tell document 1
+			-- do JavaScript "Array.from(document.getElementsByTagName('button')).filter((b) => b.innerHTML == 'Play Now').at(0).click();"
+			do JavaScript "document.getElementsByClassName('ark-ad-button-text ctaButtonText')[0].parentElement.click();"
+		end tell
+	end tell
+
+	-- sit through some ads
+	delay 60
+
+	-- click default 'PLAY' button on today
+	tell application "Safari"
+		tell document 1
+			do JavaScript "Array.from(document.getElementsByTagName('button')).filter((b) => b.innerHTML == 'PLAY').at(-1).click();"
+		end tell
+	end tell
+	delay 2
+
+	-- bring up the webpage's print dialog (not safari's)
+	keystroke "p" using {control down}
+	delay 2
+
+	-- click 'Print'
+	tell application "Safari"
+		tell document 1
+			do JavaScript "Array.from(document.getElementsByTagName('button')).filter((b) => b.innerHTML == 'Print')[0].click();"
+		end tell
+	end tell
+	delay 4
+
+	-- once PDF is up, save it in safari
+	keystroke "s" using {command down}
+	delay 2
+
+	-- and navigate to ~/Desktop and save it as "crossword.pdf"
+	keystroke "~"
+	delay 2
+	keystroke "/Desktop/"
+	delay 2
+	keystroke return
+	keystroke "crossword.pdf"
+	delay 1
+	keystroke return
+	delay 1
+
+	-- quit safari
+	delay 1
+	keystroke "q" using {command down}
+end tell
